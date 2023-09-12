@@ -1,0 +1,32 @@
+@app.post("/chat/", response_model=Dict[str, str])
+async def chat(data: InputData):
+    # 其他代码...
+    
+    # 情感/情形识别
+    emotion_response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": emotion_classification},
+            {"role": "user", "content": "提问者："+user_question+"\n回答者："+assistant_answer},
+        ],
+        temperature=1, # 可调节输出随机性的参数
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        max_tokens=50, # 限制生成回答的最大长度
+    )
+    emotion = classify_emotion(emotion_classification, emotion_response.choices[0].message.content)
+    action, expression, expression_weight = emotion_to_action(emotion, charaname, emotions_dict)
+    
+    # 其他代码...
+    
+    # 将 expression_weight 转换为字符串
+    expression_weight_str = str(expression_weight)
+    
+    return {
+        "answer": text_response.strip(),
+        "audio_base64": audio_base64,
+        "action": action,
+        "expression": expression,
+        "expression_weight": expression_weight_str
+    }
